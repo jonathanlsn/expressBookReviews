@@ -6,8 +6,20 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const username = req.body.username;
+  const password = req.body.password;
+
+  if (username && password) {
+      console.log(isValid(username))
+      if (isValid(username)) {
+          users.push({username: username, password: password});
+          return res.status(200).json({message: `User ${username} registered successfully`});
+      } else {
+          return res.status(400).json({message: `Invalid username: ${username} exists already`});
+      }
+  } else {
+      return res.status(400).json({message: "Missing parameter: Expecting username and password in request body"});
+  }
 });
 
 // Get the book list available in the shop
