@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
 const regd_users = express.Router();
 
+const JWTSecretKey = "jwt_special_key";
+
 let users = [];
 
 const isValid = (username)=>{
@@ -11,7 +13,6 @@ const isValid = (username)=>{
 }
 
 const authenticatedUser = (username,password)=>{
-  console.log(users);
   const filteredUsers = users.filter(user => (user.username === username && user.password === password));
   return (filteredUsers.length === 1);
 }
@@ -29,8 +30,8 @@ regd_users.post("/login", (req,res) => {
       // Generate JWT access token
       let accessToken = jwt.sign(
         payload, 
-        'access',
-        { expiresIn: 60 * 5 }
+        JWTSecretKey,
+        { expiresIn: 60 * 15 }
       );
 
       // Store access token in session
@@ -54,10 +55,30 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+
+  const comment = req.body.comment;
+  const ISBN = req.params.isbn;
+  const username = req.user.username;
+
+  if (!comment) {
+    return res.status(400).json({message: `Missing comment in body`});
+  }
+
+  const reviewId = Object.keys(books[ISBN].reviews)
+  .find(id => books[ISBN].reviews[id].username === username);
+
+  if (reviewId) {
+    books[ISBN].reviews[reviewId].comment = comment;
+    return res.status(200).json({message: `Review from ${username} updated`});
+  } else {
+    const newReviewId = Math.max(Object.keys(books[ISBN].reviews)) + 1
+    books[ISBN].reviews[newReviewId] = {username, comment};
+    return res.status(200).json({message: `New review added by ${username}`});
+  }
+
 });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
+module.exports.JWTSecretKey = JWTSecretKey;
