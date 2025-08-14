@@ -60,6 +60,9 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   const ISBN = req.params.isbn;
   const username = req.user.username;
 
+  if (!username) {
+    return res.status(400).json({message: `Missing username in user`});
+  }
   if (!comment) {
     return res.status(400).json({message: `Missing comment in body`});
   }
@@ -76,6 +79,25 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     return res.status(200).json({message: `New review added by ${username}`});
   }
 
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  const username = req.user.username;
+  const ISBN = req.params.isbn;
+
+  if (!username) {
+    return res.status(400).json({message: `Missing username in user`});
+  }
+
+  const reviewId = Object.keys(books[ISBN].reviews)
+  .find(id => books[ISBN].reviews[id].username === username);
+
+  if (reviewId) {
+    delete books[ISBN].reviews[reviewId];
+    res.status(200).json({message: `review from ${username} removed`});
+  } else {
+    res.status(200).json({message: `Nothing to remove`});
+  }
 });
 
 module.exports.authenticated = regd_users;
