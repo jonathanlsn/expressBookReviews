@@ -35,22 +35,34 @@ const getBooksCallback = () => {
       }, 1000); // Wait for 1 second
     });
 };
-// Get the book list available in the shop
+
 public_users.get('/',function (req, res) {
   getBooksCallback()
     .then(data => { return res.status(200).json(data) })
-    .catch(err => { return res.status(404).json({message: err}) })
+    .catch(err => { return res.status(404).json({message: err}) });
 });
 
+
 // Get book details based on ISBN
+const getBooksByISBNCallback = (codeISBN) => {
+    // Simulate an async operation
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+          if (codeISBN in books) {
+              resolve([books[codeISBN]]);
+          } else {
+              reject(new Error(`Books with ISBN ${codeISBN} not found`));
+          }
+      }, 1000); // Wait for 1 second
+    });
+};
+
 public_users.get('/isbn/:isbn',function (req, res) {
   const codeISBN = req.params.isbn;
 
-  if (codeISBN in books) {
-    return res.status(200).json([books[codeISBN]]);
-  } else {
-    return res.status(404).json({message: `Books with ISBN ${codeISBN} not found`});
-  }
+  getBooksByISBNCallback(codeISBN)
+    .then(data => { return res.status(200).json(data) })
+    .catch(err => { return res.status(404).json({message: err}) });
  });
   
 // Get book details based on author
