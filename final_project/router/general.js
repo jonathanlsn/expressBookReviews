@@ -21,14 +21,25 @@ public_users.post("/register", (req,res) => {
   }
 });
 
+
+// Get the book list available in the shop
+const getBooksCallback = () => {
+    // Simulate an async operation
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+          if (Object.values(books).length > 0) {
+              resolve(Object.values(books));
+          } else {
+              reject(new Error("No book stored"));
+          }
+      }, 1000); // Wait for 1 second
+    });
+};
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  if (Object.values(books).length > 0) {
-      return res.status(200).json(Object.values(books));
-  } else {
-      return res.status(404).json({message: "No book stored"});
-  }
-  
+  getBooksCallback()
+    .then(data => { return res.status(200).json(data) })
+    .catch(err => { return res.status(404).json({message: err}) })
 });
 
 // Get book details based on ISBN
