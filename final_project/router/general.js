@@ -76,7 +76,7 @@ const getBooksByAuthorCallback = (author) => {
           } else {
             reject(new Error(`Books with author ${author} not found`));
           }
-      }, 3000); // Wait for 1 second
+      }, 1000); // Wait for  second
     });
 };
 
@@ -89,15 +89,26 @@ public_users.get('/author/:author',function (req, res) {
 });
 
 // Get all books based on title
+const getBooksByTitleCallback = (title) => {
+    // Simulate an async operation
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+          const booksByTitle = Object.values(books).filter((book) => book.title.toLowerCase() === title.toLowerCase());
+          if (booksByTitle.length > 0 ) {
+            resolve(booksByTitle);
+          } else {
+            reject(new Error(`Books with author ${author} not found`));
+          }
+      }, 1000); // Wait for 1 second
+    });
+};
+
 public_users.get('/title/:title',function (req, res) {
   const title = req.params.title;
-  const booksByTitle = Object.values(books).filter((book) => book.title.toLocaleLowerCase() === title.toLocaleLowerCase())
-
-  if (booksByTitle.length > 0 ) {
-    return res.status(200).json(booksByTitle);
-  } else {
-    return res.status(404).json({message: `Books with title ${title} not found`});
-  }
+  
+  getBooksByTitleCallback(title)
+    .then(data => { return res.status(200).json(data) })
+    .catch(err => { return res.status(404).json({message: err}) });
 });
 
 //  Get book review
